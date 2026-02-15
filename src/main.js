@@ -1,24 +1,64 @@
-import axios from 'axios';
+import { request } from './js/pixabay-api';
+import { createGallery } from './js/render-functions';
+import { clearGallery } from './js/render-functions';
+import { showLoader } from './js/render-functions';
+import { hideLoader } from './js/render-functions';
 
-const BASE_URL = 'https://pixabay.com/api';
-// const API_KEY = import.meta.env.VITE_API_KEY;
-// console.log(API_KEY);
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 
-axios.defaults.baseURL = BASE_URL;
+const form = document.querySelector('.form');
 
-function getImagesByQuery(query) {
-  return axios({
-    url: `${BASE_URL}/?key=${VITE_API_KEY}`,
-    method: 'get',
-    params: {
-      apiKey: VITE_API_KEY,
-      q: query,
-      image_type: 'photo',
-      orientation: 'horizontal',
-      safesearch: true,
-    },
-  })
-    .then(response => console.log(response.data))
-    .catch(error => console.log(error.message));
+form.addEventListener('submit', onSubmitForm);
+
+hideLoader();
+
+function onSubmitForm(event) {
+  event.preventDefault();
+  const resInput = new FormData(form).get('search-text').trim();
+
+  if (resInput === '') {
+    iziToast.show({
+      message: 'Please enter a search query!',
+      backgroundColor: `#EF4040`,
+      messageColor: `#ffffff`,
+      position: `topRight`,
+      maxWidth: `432px`,
+    });
+    clearGallery();
+    showLoader();
+    return;
+  }
+
+  showLoader();
+  clearGallery();
+
+  request(resInput)
+    .then(({ hits }) => {
+      if (!hits || hits.length === 0) {
+        iziToast.show({
+          message:
+            ' Sorry, there are no images matching your search query. Please try again!',
+          backgroundColor: `#EF4040`,
+          messageColor: `#ffffff`,
+          position: `topRight`,
+          maxWidth: `432px`,
+        });
+
+        return;
+      }
+      createGallery(hits);
+      hideLoader();
+    })
+    .catch(error => {
+      iziToast.show({
+        message:
+          'Sorry, but there was an error processing your request. Please try again.',
+        backgroundColor: `#EF4040`,
+        messageColor: `#ffffff`,
+        position: `topRight`,
+        maxWidth: `432px`,
+      });
+    });
+  form.reset();
 }
-getImagesByQuery('cats');

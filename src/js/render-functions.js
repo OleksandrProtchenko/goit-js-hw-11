@@ -1,15 +1,68 @@
-import axios from 'axios';
-import { getImagesByQuery } from './pixabay-api';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const BASE_URL = 'https://pixabay.com/api/';
-const API = '54656491-d198bfb98120e598fae018f1a';
+const gallery = document.querySelector('.gallery');
+const loader = document.querySelector('.loader');
 
-axios.defaults.baseURL = BASE_URL;
+let lightBox = null;
 
-getImagesByQuery('yellow+flower');
+export function createGallery(images) {
+  const markup = images
+    .map(
+      ({
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => {
+        return `
+            <li class="list-item">
+                <a href="${largeImageURL}"><img src="${webformatURL}" alt="${tags}" /></a>
+                <div class="list-content">
+                    <div>
+                        <h2 class="likes">Likes</h2>
+                        <p class="count-likes">${likes}</p>
+                    </div>
+                    <div>
+                        <h2 class="views">Views</h2>
+                        <p class="count-views">${views}</p>
+                    </div>
+                    <div>
+                        <h2 class="comments">Comments</h2>
+                        <p class="count-comments">${comments}</p>
+                    </div>
+                    <div>
+                        <h2 class="downloads">Downloads</h2>
+                        <p class="count-downloads">${downloads}</p>
+                    </div>
+                </div>
+            </li>
+        `;
+      }
+    )
+    .join('');
 
-function createGallery(images) {}
-function refresh() {}
-function clearGallery() {}
-function showLoader() {}
-function hideLoader() {}
+  gallery.innerHTML = markup;
+
+  if (lightBox) {
+    lightBox.refresh();
+  } else {
+    lightBox = new SimpleLightbox('.gallery a', {
+      captions: true,
+      captionsData: 'alt',
+      captionDelay: 250,
+    });
+  }
+}
+export function clearGallery() {
+  gallery.innerHTML = '';
+}
+export function showLoader() {
+  loader.style.display = 'inline-block';
+}
+export function hideLoader() {
+  loader.style.display = 'none';
+}
