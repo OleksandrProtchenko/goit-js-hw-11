@@ -16,7 +16,6 @@ hideLoader();
 function onSubmitForm(event) {
   event.preventDefault();
   const resInput = new FormData(form).get('search-text').trim();
-
   if (resInput === '') {
     iziToast.show({
       message: 'Please enter a search query!',
@@ -25,13 +24,12 @@ function onSubmitForm(event) {
       position: `topRight`,
       maxWidth: `432px`,
     });
-    clearGallery();
-    showLoader();
+    hideLoader();
     return;
   }
 
-  showLoader();
   clearGallery();
+  showLoader();
 
   request(resInput)
     .then(({ hits }) => {
@@ -44,13 +42,15 @@ function onSubmitForm(event) {
           position: `topRight`,
           maxWidth: `432px`,
         });
-
+        hideLoader();
         return;
       }
       createGallery(hits);
       hideLoader();
     })
     .catch(error => {
+      hideLoader();
+      console.log(error.message);
       iziToast.show({
         message:
           'Sorry, but there was an error processing your request. Please try again.',
