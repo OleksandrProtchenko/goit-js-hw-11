@@ -16,6 +16,7 @@ jobs:
         env:
           MY_SECRET_KEY: ${{ secrets.VITE_PIXABEY_KEY }}
           MY_VAR: ${{ vars.VITE_PIXABEY_KEY }}
+        run: echo "Сервіс $MY_VAR запущено"
 
       - name: Install and build 🔧
         run: |
